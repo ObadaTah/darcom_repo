@@ -34,7 +34,6 @@ def get_city(city_id, db:Session = Depends(get_db), get_current_user: UserSchema
     city = db.query(City).filter(City.id == city_id).first()
     if not city:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
-
     return city
 
 

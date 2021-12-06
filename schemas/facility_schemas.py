@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from fastapi import UploadFile, File
 from typing import Optional
 from datetime import datetime
 
@@ -24,3 +25,10 @@ class CreateFacilitySchema(BaseModel):
     visible: Optional[bool]
     end_subscription_date: Optional[str]
     name_subscription: Optional[str]
+    tag: Optional[str]
+    class Config:
+	    orm_mode=True
+
+
+class AddFacilityPhotoSchema(BaseModel):
+    tag: Optional[str]

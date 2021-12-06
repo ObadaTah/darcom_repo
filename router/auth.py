@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+
+from typing import Optional
+
 from models.all import User
 from schemas.user_schemas import UserSchema
 from database import db_conn
@@ -17,7 +20,7 @@ get_db = db_conn.get_db
 router = APIRouter(tags=["auth"])
 
 @router.post("/login")
-def login(request:OAuth2PasswordRequestForm = Depends(), db:Session =Depends(get_db)):
+def login(ACCESS_TOKEN_EXPIRE_MINUTES:Optional[int] = 30, request:OAuth2PasswordRequestForm = Depends(), db:Session =Depends(get_db)):
 
     user = db.query(User).filter(
         User.username == request.username).first()    
@@ -27,7 +30,7 @@ def login(request:OAuth2PasswordRequestForm = Depends(), db:Session =Depends(get
     if not pwd_cxt.verify(request.password, user.password):
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Password Doesn't Match")
 
-    access_token = create_access_token(data={"sub":user.username})
+    access_token = create_access_token(data={"sub":user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
     return {"access_token": access_token, "token_type": "bearer", "user": user}
 
 

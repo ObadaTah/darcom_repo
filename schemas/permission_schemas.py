@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-
+from typing import Optional
 
 
 class CreatePermissionSchema(BaseModel):
-    name: str
-    description: str
-    key : str
+    name: Optional[str]
+    description: Optional[str]
+    key : Optional[str]
 
 class UpdatePermissionRole(BaseModel):
-    role_id: int 
-    permission_id: int 
+    role_id: Optional[int] 
+    permission_id: Optional[int] 

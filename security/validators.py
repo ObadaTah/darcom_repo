@@ -8,10 +8,7 @@ def validate_password(password):
     if len(password) < 8: 
        val = 'length should be at least 8'
         
-          
-    if len(password) > 20: 
-        val = 'length should be not be greater than 8' 
-          
+   
     if not any(char.isdigit() for char in password): 
         val ='Password should have at least one numeral'
           

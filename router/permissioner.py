@@ -10,14 +10,6 @@ from database import db_conn
 from schemas.user_schemas import UserSchema
 from schemas.permission_schemas import CreatePermissionSchema, UpdatePermissionRole
 
-
-
-
-
-
-
-
-
 get_db = db_conn.get_db
 
 router = APIRouter(tags=["permissions"])
@@ -53,8 +45,10 @@ def update_permission_role(request: UpdatePermissionRole, db: Session = Depends(
 
 @router.get("/get_permission/{permission_id}")
 def get_permission(permission_id, db:Session = Depends(get_db), get_current_user: UserSchema = Depends(get_current_user)):
-    permissions = db.query(Permission).filter(Permission.id == permission_id).first()
-    return permissions
+    permission = db.query(Permission).filter(Permission.id == permission_id).first()
+    if not permission:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
+    return permission
 
 
 @router.get("/get_permission_roles/{permission_id}")

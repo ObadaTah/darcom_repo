@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, File, UploadFile, Request
 from sqlalchemy.orm import Session
 
-from models.all import Facility, FacilityPhotoLike, FacilityPhoto
+from models.all import Facility, FacilityPhotoLike, FacilityPhoto, Media
 
 from security.JWToken import get_current_user
 
 from database import db_conn
+
+from .mediaer import data_parser_and_saver
 
 from schemas.user_schemas import UserSchema
 from schemas.facility_schemas import CreateFacilitySchema
@@ -15,9 +17,56 @@ get_db = db_conn.get_db
 
 router = APIRouter(tags=["Facility"])
 
+
+def add_facility_photo(
+    facility_id:int,
+    tag:str,
+    file:UploadFile = File(default=None),
+    db: Session = Depends(get_db),
+):
+    facility = db.query(Facility).filter(Facility.id == facility_id).first()
+    if not facility:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
+
+    data = data_parser_and_saver(file, "asdasdas")
+    if type(data) is not dict:
+        return data
+
+    media = Media(mediable_type='facility', mediable_id=facility.id,
+    tag=tag,
+    disk='local',
+    directory= data['directory'],
+    media_tag=tag,
+    file_name=data['filename'],
+    original_name=file.filename,
+    extension=data['extension'],
+    mime_type=data['extension'],
+    size=data['size']
+    )
+
+    db.add(media)
+    try:
+        db.commit()
+    except Exception as x:
+        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    photo = FacilityPhoto(facility_id=facility_id, media_id=media.id)
+    db.add(photo)
+
+    try:
+        db.commit()
+    except Exception as x:
+        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.refresh(photo)
+    return True
+
+
+
 @router.post("/create_facility")
 def create_facility(
-    request: CreateFacilitySchema,
+    request: CreateFacilitySchema = Depends(),
+    file:UploadFile = File(default=None),
     db: Session = Depends(get_db),
     get_current_user: UserSchema = Depends(get_current_user),
 ):
@@ -48,7 +97,11 @@ def create_facility(
     try:
         db.commit()
     except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error at facility commiting": x})
+    if file is not None:
+        photo = add_facility_photo(file=file, tag=request.tag, db=db, facility_id=new_facility.id)
+        if type(photo) is not bool:
+            return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error at photo commiting": photo})
 
     db.refresh(new_facility)
     return new_facility
@@ -79,7 +132,8 @@ def get_all_facilities(
 @router.put("/update_facility/{id}")
 def update_facility(
     id,
-    request: CreateFacilitySchema,
+    request: CreateFacilitySchema = Depends(),
+    file:UploadFile = File(default=None),
     db: Session = Depends(get_db),
     get_current_user: UserSchema = Depends(get_current_user),
 ):
@@ -106,6 +160,11 @@ def update_facility(
     if request.facebook_url:facility.facebook_url = request.facebook_url
     if request.disabled:facility.disabled = False
     if request.visible:facility.visible = True
+    if file is not None:
+        photo = add_facility_photo(file=file, tag=request.tag, db=db, facility_id=new_facility.id)
+        if type(photo) is not bool:
+            return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error at photo commiting": photo})
+        # Delete The Previous Photo With The Same Tag
     # if (request.end_subscription_date):
     #     facility.end_subscription_date=request.end_subscription_date
 
@@ -162,4 +221,3 @@ def add_facility_like(
 
 
     return facility_photo_like
-
