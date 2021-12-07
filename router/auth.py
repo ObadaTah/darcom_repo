@@ -12,7 +12,7 @@ from security.validators import validate_password, validate_email
 
 from sqlalchemy.orm import Session
 from datetime import timedelta
-from security.JWToken import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from security.JWToken import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, Roler
 
 
 
@@ -36,6 +36,8 @@ def login(ACCESS_TOKEN_EXPIRE_MINUTES:Optional[int] = 30, request:OAuth2Password
 
 @router.post("/register")
 def register(request: UserSchema, db:Session = Depends(get_db)):
+    # if not Roler.role(1, db, 'login'):
+    #     return HTTPException(status.HTTP_401_UNAUTHORIZED, detail={'error': "NO PERMISSION"})
     # validators to be uncommented when we release 
     
     # password = validate_password(request.password)
@@ -45,8 +47,8 @@ def register(request: UserSchema, db:Session = Depends(get_db)):
     # if not email:
     #     return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail="email is not valid")
 
-    hashed_password = pwd_cxt.hash(request.password)
-    new_user = User(username=request.username, password=hashed_password, email= request.email)
+    # hashed_password = pwd_cxt.hash(request.password)
+    # new_user = User(username=request.username, password=hashed_password, email= request.email)
 
     db.add(new_user)
     try:

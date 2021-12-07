@@ -448,5 +448,73 @@ class Setting(Base):
     deleted_at = Column(DateTime, nullable=True)
 
 
+class Comment(Base):
+    __tablename__ = "Comment"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    commentable_type = Column(String, nullable=True)
+    commentable_id = Column(Integer, nullable=True)
+    comment_text = Column(String, nullable=True)
+    comment_rate = Column(Integer, nullable=True)
+    comment_status = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow,
+    )
+    deleted_at = Column(DateTime, nullable=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("User.id"),
+        nullable=True,
+    )
 
 
+
+
+class Message(Base):
+    __tablename__ = "Message"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    messageable_type = Column(String, nullable=True)
+    messageable_id = Column(Integer, nullable=True)
+    message_title = Column(String, nullable=True)
+    message_description = Column(String, nullable=True)
+    message_audience = Column(String, nullable=True)
+    message_reaction = Column(String, nullable=True)
+    message_status = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow,
+    )
+    deleted_at = Column(DateTime, nullable=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("User.id"),
+        nullable=True,
+    )
+
+
+# class FacilitySubscription(Base):
+#     __tablename__ = "FacilitySubscription"
+#     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+#     subscribable_type = Column(String, nullable=True)
+#     subscribable_id = Column(Integer, nullable=True)
+#     date = Column(DateTime, nullable=True)
+   
+#     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+#     updated_at = Column(
+#         DateTime,
+#         default=datetime.datetime.utcnow,
+#         onupdate=datetime.datetime.utcnow,
+#     )
+#     deleted_at = Column(DateTime, nullable=True)
+
+#     facility_id = Column(
+#         Integer,
+#         ForeignKey("Facility.id"),
+#         nullable=True,
+#     )

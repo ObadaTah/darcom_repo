@@ -5,7 +5,7 @@ from jose import jwt
 from jose.exceptions import JWTError
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
-from models.all import User
+from models.all import User, UserRole, Role, RolePermission, Permission
 
 
 from database import db_conn
@@ -81,3 +81,15 @@ def get_current_user(
             headers={"WWW-Authenticate": authenticate_value},
         )
     return user
+
+
+class Roler():
+    def role(user_id, db, key):
+        user_roles = db.query(UserRole).filter(User.id == user_id).all()
+        keys = []
+        for i in user_roles:
+            permission_id = db.query(RolePermission).filter(Role.id == i.role_id).first().permission_id
+            keys.append(db.query(Permission).filter(Permission.id == permission_id).first().key)
+        if key in keys:
+            return True
+        return False

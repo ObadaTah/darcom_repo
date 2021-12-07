@@ -62,7 +62,7 @@ def get_users_roles(user_id, db:Session = Depends(get_db), get_current_user: Use
     user_roles = db.query(UserRole).filter(User.id == user_id).all()
     roles_names = {"names": []}
     for user_role in user_roles:
-        roles_names["names"].append(db.query(Role).filter(Role.id == user_role.role_id).first())
+        roles_names["names"].append(db.query(Role).filter(Role.id == user_role.role_id).first().name)
     
     return roles_names
 

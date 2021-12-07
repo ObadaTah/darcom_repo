@@ -18,6 +18,8 @@ from router import (
     ranker,
     categoryer,
     settinger,
+    commenter,
+    messager,
 )
 
 Base.metadata.create_all(db_conn.engine)
@@ -38,6 +40,8 @@ app.include_router(carder.router)
 app.include_router(ranker.router)
 app.include_router(categoryer.router)
 app.include_router(settinger.router)
+app.include_router(messager.router)
+app.include_router(commenter.router)
 
 
 if __name__ == "__main__":
