@@ -1,18 +1,13 @@
 
-from fastapi import APIRouter, Depends, status, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
-from PIL import Image 
-
-from models.all import Facility, Media, FacilityPhoto
-
-from security.JWToken import get_current_user
-
-from database import db_conn
-
-from schemas.user_schemas import UserSchema
-
 from datetime import datetime
 
+from database import db_conn
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from models.all import Facility, FacilityPhoto, Media
+from PIL import Image
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -23,10 +18,11 @@ VALID_IMAGE_EXTENSIONS = [
     ".png",
 ]
 import os.path
+import random
+import string
 from os import path
 
-import random  
-import string 
+
 def data_parser_and_saver(file, tag='untaged'):
     extension = ''
     for e in VALID_IMAGE_EXTENSIONS:
@@ -65,8 +61,14 @@ def get_product_media(product_id, db:Session = Depends(get_db), get_current_user
     product_media = db.query(Media).filter(Media.mediable_type == 'product' or Media.mediable_id == product_id).all()
     if not product_media:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
-    print(product_media)
     return product_media
+
+@router.get("/get_story_media/{story_id}")
+def get_product_media(story_id, db:Session = Depends(get_db), get_current_user: UserSchema = Depends(get_current_user)):
+    story_media = db.query(Media).filter(Media.mediable_id == story_id).all()
+    if not story_media:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
+    return story_media
 
 
 @router.get("/get_all_media")

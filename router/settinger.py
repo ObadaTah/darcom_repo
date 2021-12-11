@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import Setting
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Setting
 from schemas.setting_schemas import CreateSettingSchema
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -24,12 +19,9 @@ def create_setting(request:CreateSettingSchema, db:Session =Depends(get_db), get
     )
 
     db.add(new_setting)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
-
+    db.commit()
     db.refresh(new_setting)
+
     return new_setting
 
 @router.get("/get_setting/{setting_id}")
@@ -58,11 +50,7 @@ def update_setting(id, request: CreateSettingSchema, db: Session = Depends(get_d
     if request.value is not None: setting.value = request.value
 
     db.add(setting)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
-
+    db.commit()
     db.refresh(setting)
 
     return setting
@@ -74,11 +62,8 @@ def delete_setting(id, db:Session = Depends(get_db), get_current_user: UserSchem
     if not setting.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        setting.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+
+    setting.delete()
 
     return "Deleted Succ"
 

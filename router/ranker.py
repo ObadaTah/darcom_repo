@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import Rank
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Rank
 from schemas.rank_schemas import CreateRankSchema
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -25,10 +20,8 @@ def create_rank(request:CreateRankSchema, db:Session =Depends(get_db), get_curre
     )
 
     db.add(new_rank)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(new_rank)
     return new_rank
@@ -60,10 +53,8 @@ def update_rank(id, request: CreateRankSchema, db: Session = Depends(get_db), ge
     if request.points_to is not None: rank.points_to = request.points_to
 
     db.add(rank)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(rank)
 
@@ -76,11 +67,8 @@ def delete_rank(id, db:Session = Depends(get_db), get_current_user: UserSchema =
     if not rank.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        rank.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+    rank.delete()
+    db.commit()
 
     return "Deleted Succ"
 

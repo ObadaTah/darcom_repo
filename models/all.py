@@ -25,21 +25,21 @@ class Role(Base):
 class User(Base):
     __tablename__ = "User"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    full_name = Column(String(255), index=True, nullable=True)
-    username = Column(String(255), index=True, nullable=True)
-    email = Column(String(100), unique=True, index=True, nullable=True)
-    phone_number = Column(String(13), unique=True, index=True, nullable=True)
+    full_name = Column(String, nullable=True)
+    username = Column(String, unique=True)
+    email = Column(String, nullable=True)
+    phone_number = Column(String, unique=True, nullable=True)
     email_verified_at = Column(DateTime, nullable=True)
-    password = Column(String(255), nullable=True)
-    gender = Column(String(1), nullable=True)
+    password = Column(String, nullable=True)
+    gender = Column(String, nullable=True)
     date_of_birth = Column(DateTime, nullable=True)
     age = Column(Integer, nullable=True)
-    unread_notification = Column(Integer, nullable=True)
-    pointes = Column(Integer, nullable=True)
-    user_status = Column(String(10), nullable=True)
-    notes = Column(String(500), nullable=True)
-    last_login = Column(DateTime, nullable=True)
-    current_day = Column(Integer, nullable=True)
+    unread_notification = Column(Integer, default=0)
+    pointes = Column(Integer, default=0)
+    user_status = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    last_login = Column(DateTime, default=datetime.datetime.utcnow)
+    current_day = Column(Integer, default=0)
     api_token = Column(String, nullable=True)
     fcm_token = Column(String, nullable=True)
     facebook_id = Column(String, nullable=True)
@@ -57,6 +57,25 @@ class User(Base):
     )
 
 
+class LoginHistory(Base):
+    __tablename__ = "LoginHistory"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    login_history = Column(DateTime, default=datetime.datetime.utcnow)
+
+class UserLoginHistory(Base):
+    __tablename__ = "UserLoginHistory"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("User.id"),
+        nullable=False,
+    )
+    history_id = Column(
+        Integer,
+        ForeignKey("LoginHistory.id"),
+        nullable=False,
+    )
 class UserRole(Base):
     __tablename__ = "user_roles"
     user_id = Column(
@@ -472,7 +491,6 @@ class Comment(Base):
 
 
 
-
 class Message(Base):
     __tablename__ = "Message"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -498,6 +516,7 @@ class Message(Base):
     )
 
 
+
 # class FacilitySubscription(Base):
 #     __tablename__ = "FacilitySubscription"
 #     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -518,3 +537,42 @@ class Message(Base):
 #         ForeignKey("Facility.id"),
 #         nullable=True,
 #     )
+
+class SubscribeCategory(Base):
+    __tablename__ = "SubscribeCategory"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    subscribable_type = Column(String, nullable=True)
+    subscribable_id = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow,
+    )
+    deleted_at = Column(DateTime, nullable=True)
+
+    category_id = Column(
+        Integer,
+        ForeignKey("Category.id"),
+        nullable=True,
+    )
+
+
+class SubscribeFacility(Base):
+    __tablename__ = "SubscribeFacility"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    subscribable_type = Column(String, nullable=True)
+    subscribable_id = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow,
+    )
+    deleted_at = Column(DateTime, nullable=True)
+
+    facility_id = Column(
+        Integer,
+        ForeignKey("Facility.id"),
+        nullable=True,
+    )

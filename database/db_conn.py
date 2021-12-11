@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 host_server = 'localhost'
 db_server_port = '5432'
-database_name = 'darcom1'
+database_name = 'darcom'
 db_username = 'postgres'
 db_password = '123'
 ssl_mode = 'prefer'

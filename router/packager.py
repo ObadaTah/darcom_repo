@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import Package
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Package
 from schemas.package_schemas import CreatePackageSchema
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -28,10 +23,8 @@ def create_package(request:CreatePackageSchema, db:Session =Depends(get_db), get
     )
 
     db.add(new_package)
-    try:
-        db.commit()
-    except Exception as x:
-        raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(new_package)
     return new_package
@@ -66,10 +59,8 @@ def update_package(id, request: CreatePackageSchema, db: Session = Depends(get_d
     if request.price is not None: package.price = request.price
 
     db.add(package)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(package)
 
@@ -82,11 +73,8 @@ def delete_package(id, db:Session = Depends(get_db), get_current_user: UserSchem
     if not package.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        package.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+    package.delete()
+    db.commit()
 
     return "Deleted Succ"
 

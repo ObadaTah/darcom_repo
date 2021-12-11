@@ -1,14 +1,11 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import User, Role, Permission, RolePermission
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Permission, Role, RolePermission, User
+from schemas.permission_schemas import (CreatePermissionSchema,
+                                        UpdatePermissionRole)
 from schemas.user_schemas import UserSchema
-from schemas.permission_schemas import CreatePermissionSchema, UpdatePermissionRole
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -114,10 +111,7 @@ def delete_permission_role(request: UpdatePermissionRole, db: Session = Depends(
 
 
     permission_role.delete()
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
 
+    db.commit()
     return "Deleted Succ"
 

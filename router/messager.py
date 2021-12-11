@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import Message
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Message
 from schemas.message_schemas import CreateMessageSchema
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -30,10 +25,8 @@ def create_message(request:CreateMessageSchema, db:Session =Depends(get_db), get
     )
 
     db.add(new_message)
-    # try:
+
     db.commit()
-    # except Exception as x:
-    #     return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
 
     db.refresh(new_message)
     return new_message
@@ -68,11 +61,9 @@ def update_message(id, request: CreateMessageSchema, db: Session = Depends(get_d
     if request.message_status is not None: message.message_status = request.message_status
 
     db.add(message)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
 
+    db.commit()
+ 
     db.refresh(message)
 
     return message
@@ -84,11 +75,9 @@ def delete_message(id, db:Session = Depends(get_db), get_current_user: UserSchem
     if not message.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        message.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+
+    message.delete()
+    db.commit()
 
     return "Deleted Succ"
 

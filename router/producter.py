@@ -1,17 +1,12 @@
-from fastapi import APIRouter, Depends, status, HTTPException, File, UploadFile
+from database import db_conn
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from models.all import Media, Product
+from schemas.product_schemas import CreateProductSchema
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
 from sqlalchemy.orm import Session
 
-from models.all import Product, Media
-
-from security.JWToken import get_current_user
-
-from database import db_conn
-
 from .mediaer import data_parser_and_saver
-
-from schemas.user_schemas import UserSchema
-from schemas.product_schemas import CreateProductSchema
-
 
 get_db = db_conn.get_db
 
@@ -139,10 +134,7 @@ def delete_product(
     if not product.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        product.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+    product.delete()
+    db.commit()
 
     return "Deleted Succ"

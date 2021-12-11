@@ -1,37 +1,37 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import Banner
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Banner
 from schemas.banner_schemas import CreateBannerSchema
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
 router = APIRouter(tags=["Banner"])
 
 
-@router.post("/create_banner/{facility_id}")
-def create_banner(facility_id, request:CreateBannerSchema, db:Session =Depends(get_db), get_current_user: UserSchema = Depends(get_current_user)):
+@router.post("/create_banner/")
+def create_banner(request:CreateBannerSchema, db:Session =Depends(get_db), get_current_user: UserSchema = Depends(get_current_user)):
+    city = db.query(City).filter(City.id == request.city_id).all()
+    if not any(city):
+        return HTTPException(status.HTTP_404_NOT_FOUND, detail='City Not Found')
+    facility = db.query(Facilit).filter(Facilit.id == request.facility_id).all()
+    if not any(facility):
+        return HTTPException(status.HTTP_404_NOT_FOUND, detail='Facility Not Found')
+
     new_banner = Banner(
-        facility_id=facility_id,
-        city_id=city_id,
+        facility_id=request.facility_id,
+        city_id=request.city_id,
         banner_type = request.banner_type,
-        start_at = request.start_at,
-        end_at= request.end_at,
+        # start_at = request.start_at,
+        # end_at= request.end_at,
         url= request.url,
         status= request.status,   
     )
     db.add(new_banner)
-    try:
-        db.commit()
-    except Exception as x:
-        raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(new_banner)
     return new_banner
@@ -58,6 +58,14 @@ def update_banner(id, request: CreateBannerSchema, db: Session = Depends(get_db)
     if not banner:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
+    city = db.query(City).filter(City.id == request.city_id).all()
+    if not any(city):
+        return HTTPException(status.HTTP_404_NOT_FOUND, detail='City Not Found')
+
+    facility = db.query(Facilit).filter(Facilit.id == request.facility_id).all()
+    if not any(facility):
+        return HTTPException(status.HTTP_404_NOT_FOUND, detail='Facility Not Found')
+        
     if request.facility_id is not None: banner.facility_id = request.facility_id
     if request.city_id is not None: banner.city_id = request.city_id
     if request.banner_type is not None: banner.banner_type = request.banner_type
@@ -67,10 +75,8 @@ def update_banner(id, request: CreateBannerSchema, db: Session = Depends(get_db)
     if request.status is not None: banner.status = request.status
 
     db.add(banner)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(banner)
 
@@ -83,11 +89,8 @@ def delete_banner(id, db:Session = Depends(get_db), get_current_user: UserSchema
     if not banner.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        banner.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+    banner.delete()
+    db.commit()
 
     return "Deleted Succ"
 

@@ -13,6 +13,7 @@ class CreateStorySchema(BaseModel):
     publish_at: Optional[str]
     days: Optional[int]
     duration: Optional[int]
+    tag: Optional[str]
 
     class Config:
 	    orm_mode=True

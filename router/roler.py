@@ -1,17 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import User, Role, UserRole
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import Role, User, UserRole
 from schemas.role_schemas import CreateRoleSchema, UpdateUsersRole
-
-
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -23,10 +16,8 @@ def create_role(request:CreateRoleSchema, db:Session =Depends(get_db), get_curre
     new_role = Role(name= request.name, description=request.description)
 
     db.add(new_role)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(new_role)
     return new_role
@@ -42,11 +33,7 @@ def update_user_role(request: UpdateUsersRole, db: Session = Depends(get_db), ge
     new_user_role = UserRole(role_id=request.role_id, user_id=request.user_id)
 
     db.add(new_user_role)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
-
+    db.commit()
     return new_user_role
 
 @router.get("/get_role/{id}")
@@ -82,10 +69,8 @@ def update_role(id, request: CreateRoleSchema, db: Session = Depends(get_db), ge
 
     role.name = request.name
     role.description = request.description
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
 
     return request
@@ -97,10 +82,7 @@ def delete_role(id, db:Session = Depends(get_db), get_current_user: UserSchema =
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
     role.delete()
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+    db.commit()
 
     return "Deleted Succ"
 
@@ -114,10 +96,8 @@ def delete_user_role(request: UpdateUsersRole, db: Session = Depends(get_db), ge
 
 
     user_role.delete()
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+
+    db.commit()
 
     return "Deleted Succ"
 

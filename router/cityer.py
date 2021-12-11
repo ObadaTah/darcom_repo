@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-
-from models.all import City
-
-from security.JWToken import get_current_user
-
 from database import db_conn
-
-from schemas.user_schemas import UserSchema
+from fastapi import APIRouter, Depends, HTTPException, status
+from models.all import City
 from schemas.city_schemas import CreateCitySchema
-
+from schemas.user_schemas import UserSchema
+from security.JWToken import get_current_user
+from sqlalchemy.orm import Session
 
 get_db = db_conn.get_db
 
@@ -21,10 +16,8 @@ def create_city(request:CreateCitySchema, db:Session =Depends(get_db), get_curre
     new_city = City(name= request.name)
 
     db.add(new_city)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(new_city)
     return new_city
@@ -53,10 +46,8 @@ def update_city(id, request: CreateCitySchema, db: Session = Depends(get_db), ge
     city.name = request.name
 
     db.add(city)
-    try:
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={"error": x})
+
+    db.commit()
 
     db.refresh(city)
 
@@ -69,11 +60,9 @@ def delete_city(id, db:Session = Depends(get_db), get_current_user: UserSchema =
     if not city.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
 
-    try:
-        city.delete()
-        db.commit()
-    except Exception as x:
-        return HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail={'error': x})
+
+    city.delete()
+    db.commit()
 
     return "Deleted Succ"
 
